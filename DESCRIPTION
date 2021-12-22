@@ -12,3 +12,5 @@ Imports:
     dplyr,
     magrittr,
     readxl
+URL: https://github.com/BibelnieksDFW/BrBS
+BugReports: https://github.com/BibelnieksDFW/BrBS/issues
