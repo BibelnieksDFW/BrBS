@@ -1,12 +1,14 @@
 Package: BrBS
-Title: What the Package Does (One Line, Title Case)
+Title: Exploratory Analysis and Visualizations for BBS database
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Andris", "Bibelnieks", , "andris.bibelnieks@gmail.com", role = c("aut", "cre"))
+Description: Provide convenient functions and workflow for reading BBS database into R and performing exploratory analysis.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
+Imports: 
+    dplyr,
+    magrittr,
+    readxl
