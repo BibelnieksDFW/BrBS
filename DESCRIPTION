@@ -13,6 +13,8 @@ Imports:
     lubridate,
     magrittr,
     readxl,
-    suncalc
+    stringr,
+    suncalc,
+    tidyr
 URL: https://github.com/BibelnieksDFW/BrBS
 BugReports: https://github.com/BibelnieksDFW/BrBS/issues
