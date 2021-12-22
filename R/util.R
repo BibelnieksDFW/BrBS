@@ -17,7 +17,7 @@ get_year_rows <- function(db_file, sheets) {
   year_ranges <- data.frame()
   for(sheet in sheets) {
     # Read in first 2 columns to get island and years
-    all_year <- readxl::read_xlsx(db_file, sheet = sheet, range = cell_cols("A:B"))
+    all_year <- readxl::read_xlsx(db_file, sheet = sheet, range = readxl::cell_cols("A:B"))
     # Find first and last rows for each
     last <- length(all_year$Year)-match(unique(all_year$Year),rev(all_year$Year))+1
     first <- c(1,last[1:(length(last)-1)]+1)
@@ -95,7 +95,9 @@ fix_date_2021 <- function(dat) {
                            # For the almost date ones, it's real easy to get them there
                            as.Date(dat$Date[which(nchar(dat$Date) == 8)],
                                    format = "%m/%d/%y"))
-  Date_fixed <- rbind(fix_len5, fix_len8) %>% arrange(idx) %>% select(fixed)
+  Date_fixed <- rbind(fix_len5, fix_len8) %>%
+                dplyr::arrange(idx) %>%
+                dplyr::select(fixed)
   dat <- dat %>%
           dplyr::mutate(Date = Date_fixed$fixed)
 }

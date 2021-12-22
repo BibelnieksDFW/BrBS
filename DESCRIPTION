@@ -10,7 +10,9 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
     dplyr,
+    lubridate,
     magrittr,
-    readxl
+    readxl,
+    suncalc
 URL: https://github.com/BibelnieksDFW/BrBS
 BugReports: https://github.com/BibelnieksDFW/BrBS/issues

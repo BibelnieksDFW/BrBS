@@ -2,7 +2,7 @@
 % Please edit documentation in R/util.R
 \name{fix_date_2021}
 \alias{fix_date_2021}
-\title{Title}
+\title{Fix inconsistent date formatting for 2021}
 \usage{
 fix_date_2021(dat)
 }
@@ -13,5 +13,5 @@ fix_date_2021(dat)
 Same dataframe as input, but correctly formatted date column
 }
 \description{
-Title
+Fix inconsistent date formatting for 2021
 }
