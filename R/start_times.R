@@ -96,3 +96,35 @@ get_survey_start_times <- function(all_yrs, yrs, isl) {
                 TRUE ~ "Not_Recorded")),
       Mean_Sunrise_Diff = ifelse(Mean_Sunrise_Diff_Class == "Not_Recorded", NA, Mean_Sunrise_Diff))
 }
+
+#' Plot start times over time.
+#'
+#' @param start_dat Start time dataframe from get_survey_start_times
+#'
+#' @return Plot of start times over time.
+#' @export
+#'
+#' @examples
+plot_start_times <- function(start_dat) {
+
+  min_yr <- floor(min(start_dat$YrQtr))
+  max_yr <- ceiling(max(start_dat$YrQtr))
+
+  plt <- start_dat %>%
+    dplyr::mutate(Qtr = factor((YrQtr-floor(YrQtr))*4+1)) %>%
+    dplyr::filter(Mean_Sunrise_Diff_Class != "Not_Recorded") %>%
+    ggplot2::ggplot(ggplot2::aes(x = YrQtr, y = Mean_Sunrise_Diff,
+               color = Mean_Sunrise_Diff_Class,
+               shape = Qtr)) +
+    ggplot2::geom_point() +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+    ggplot2::scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1)) +
+    ggplot2::labs(y = "Avg Start Time (Minutes from Sunrise)",
+         color = "Interval",
+         shape = "Quarter") +
+    ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+          legend.position = c(.25, .75),
+          legend.box = "horizontal")
+
+  plt
+}
