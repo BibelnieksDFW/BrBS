@@ -2,7 +2,7 @@
 % Please edit documentation in R/observers.R
 \name{get_observers}
 \alias{get_observers}
-\title{Title}
+\title{Gather observers over time}
 \usage{
 get_observers(all_yrs, yrs)
 }
@@ -15,5 +15,5 @@ get_observers(all_yrs, yrs)
 Dataframe with year-quarter, observer's initials, chronological order, and number of surveys conducted.
 }
 \description{
-Title
+Gather observers over time
 }

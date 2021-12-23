@@ -10,9 +10,11 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
     dplyr,
+    ggplot2,
     lubridate,
     magrittr,
     readxl,
+    stats,
     stringr,
     suncalc,
     tidyr

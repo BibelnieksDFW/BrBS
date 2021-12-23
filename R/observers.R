@@ -1,5 +1,4 @@
-# Gather observers over time
-#' Title
+#' Gather observers over time
 #'
 #' @param all_yrs List of dataframes produced by get_island_year_list.
 #' @param yrs Numeric vector of years to pull from all_yrs
@@ -59,4 +58,49 @@ get_observers <- function(all_yrs, yrs) {
       by = "Observer"
     ) %>%
     dplyr::arrange(order)
+}
+
+
+#' Generate plot of observers over time
+#'
+#' @param obs_dat Observer dataframe from get_obervers.
+#' @param filter_obs Filter observers to only show those who have conducted more than one survey. Default does not filter.
+#'
+#' @return Plot of observers over time.
+#' @export
+#'
+#' @examples
+plot_observers <- function(obs_dat, filter_obs = FALSE) {
+  min_yr <- floor(min(obs$YrQtr))
+  max_yr <- ceiling(max(obs$YrQtr))
+  if(filter_obs) {
+    plt <- obs_dat %>%
+            dplyr::filter(nyrs>1) %>%
+            dplyr::mutate(Qtr = factor((YrQtr-floor(YrQtr))*4+1)) %>%
+            ggplot2::ggplot(ggplot2::aes(y = stats::reorder(Observer, order), x = YrQtr)) +
+            ggplot2::geom_point(ggplot2::aes(shape = Qtr, color = Replicate)) +
+            ggplot2::geom_line(linetype = "dotted") +
+            ggplot2::scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1)) +
+            ggplot2::scale_color_manual(values = c("black","red")) +
+            ggplot2::labs(y = "Observer (>1 Survey)",
+                       shape = "Quarter") +
+            ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                        legend.position = c(.1, .75),
+                        legend.box = "horizontal")
+  } else {
+    plt <- obs_dat %>%
+      dplyr::mutate(Qtr = factor((YrQtr-floor(YrQtr))*4+1)) %>%
+      ggplot2::ggplot(ggplot2::aes(y = stats::reorder(Observer, order), x = YrQtr)) +
+      ggplot2::geom_point(ggplot2::aes(shape = Qtr, color = Replicate)) +
+      ggplot2::geom_line(linetype = "dotted") +
+      ggplot2::scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1)) +
+      ggplot2::scale_color_manual(values = c("black","red")) +
+      ggplot2::labs(y = "Observer",
+                    shape = "Quarter") +
+      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+                     legend.position = c(.1, .75),
+                     legend.box = "horizontal")
+  }
+
+  plt
 }
