@@ -71,8 +71,8 @@ get_observers <- function(all_yrs, yrs) {
 #'
 #' @examples
 plot_observers <- function(obs_dat, filter_obs = FALSE) {
-  min_yr <- floor(min(obs$YrQtr))
-  max_yr <- ceiling(max(obs$YrQtr))
+  min_yr <- floor(min(obs_dat$YrQtr))
+  max_yr <- ceiling(max(obs_dat$YrQtr))
   if(filter_obs) {
     plt <- obs_dat %>%
             dplyr::filter(nyrs>1) %>%
