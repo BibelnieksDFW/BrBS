@@ -87,15 +87,15 @@ get_island_year_list <- function(db_file, db_names, year_ranges, isl) {
 }
 
 
-#' Fix inconsistent date formatting for 2021
+#' Format dates that aren't already of the standard forms "%Y-%m-%d" or "%Y/%m/%d"
 #'
-#' @param dat Dataframe with 2021 BBS year data
+#' @param dat Dataframe with BBS year data to be corrected.
 #'
 #' @return Same dataframe as input, but correctly formatted date column
 #' @export
 #'
 #' @examples
-fix_date_2021 <- function(dat) {
+fix_date <- function(dat) {
   fix_len5 <- data.frame(idx = which(nchar(dat$Date) == 5),
                          fixed =
                            # For the ones that are numbers count days from Excel's weird origin - 12/30/1899

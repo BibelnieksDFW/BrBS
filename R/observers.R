@@ -16,7 +16,7 @@ get_observers <- function(all_yrs, yrs) {
     yr_dat <- all_yrs[[i]]
     # Fix date column for 2021
     if(yr == 2021) {
-      yr_dat <- fix_date_2021(yr_dat)
+      yr_dat <- fix_date(yr_dat)
     }
     obs_dat[[i]] <- yr_dat %>%
       mutate(YrQtr = .data$Year + (lubridate::quarter(.data$Date)-1)*0.25) %>%

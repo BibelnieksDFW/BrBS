@@ -16,7 +16,7 @@ get_survey_start_times <- function(all_yrs, yrs, isl) {
 
     # Fix date column for 2021
     if(yr == 2021) {
-      yr_dat <- fix_date_2021(yr_dat)
+      yr_dat <- fix_date(yr_dat)
     }
 
     # Fix formatting of Start to just %H:%M
