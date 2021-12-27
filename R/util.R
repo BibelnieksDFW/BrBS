@@ -34,7 +34,7 @@ get_year_rows <- function(db_file, sheet) {
   names(ret) <- c("island", "year", "first", "last")
   # Count cumulative occurrences of each year
   ret <- ret %>%
-         group_by(year) %>%
+         group_by(.data$year) %>%
          mutate(occ = 1:n(), nocc = n()) %>%
          ungroup()
 

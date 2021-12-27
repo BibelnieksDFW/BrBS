@@ -22,7 +22,7 @@ get_survey_start_times <- function(all_yrs, yrs, isl) {
     # Fix formatting of Start to just %H:%M
     if(lubridate::is.POSIXct(yr_dat$Start)) {
       yr_dat <- yr_dat %>%
-                mutate(Start = format(Start, "%H:%M"))
+                mutate(Start = format(.data$Start, "%H:%M"))
     } else if(is.character(yr_dat$Start) &
               length(grep("[:digit:]*:[:digit:]*",yr_dat$Start)) != length(yr_dat$Start)) {
       # Don't change any that are already ok
@@ -37,8 +37,8 @@ get_survey_start_times <- function(all_yrs, yrs, isl) {
 
 
       Start_fixed <- rbind(ok, need_fix) %>%
-                      arrange(idx) %>%
-                      select(fixed)
+                      arrange(.data$idx) %>%
+                      select(.data$fixed)
       yr_dat <- yr_dat %>%
                  mutate(Start = as.character(Start_fixed$fixed))
     }
@@ -46,13 +46,13 @@ get_survey_start_times <- function(all_yrs, yrs, isl) {
 
 
     strt_yr_date[[i]] <- yr_dat %>%
-      mutate(Month = lubridate::month(Date),
-             Day = lubridate::day(Date)) %>%
-      select(Year, Station, Month, Day, Start) %>%
+      mutate(Month = lubridate::month(.data$Date),
+             Day = lubridate::day(.data$Date)) %>%
+      select(.data$Year, .data$Station, .data$Month, .data$Day, .data$Start) %>%
       unique() %>%
-      group_by(Year, Month, Day) %>%
-      summarise(N_Stations = n(), Earliest = min(Start)) %>%
-      mutate(Qtr = ceiling(Month/3))
+      group_by(.data$Year, .data$Month, .data$Day) %>%
+      summarise(N_Stations = n(), Earliest = min(.data$Start)) %>%
+      mutate(Qtr = ceiling(.data$Month/3))
     print(sprintf("Year %d complete", yr))
   }
   strt_yr_date <- dplyr::bind_rows(strt_yr_date)
@@ -68,33 +68,33 @@ get_survey_start_times <- function(all_yrs, yrs, isl) {
 
   # Add in sunrise times
   strt_yr_date <- strt_yr_date %>%
-    mutate(Sunrise = suncalc::getSunlightTimes(date = lubridate::make_date(Year, Month, Day),
+    mutate(Sunrise = suncalc::getSunlightTimes(date = lubridate::make_date(.data$Year, .data$Month, .data$Day),
                                       lat = isl_lat,
                                       lon = isl_long,
-                                      keep = "sunrise", tz = "Pacific/Saipan") %>% .$sunrise,
-           Diff_to_Sunrise = difftime(lubridate::make_datetime(Year, Month, Day,
-                                                    hour = Earliest %>%
+                                      keep = "sunrise", tz = "Pacific/Saipan") %>% .data$sunrise,
+           Diff_to_Sunrise = difftime(lubridate::make_datetime(.data$Year, .data$Month, .data$Day,
+                                                    hour = .data$Earliest %>%
                                                       substr(1, 2) %>%
                                                       as.numeric(),
-                                                    min = Earliest %>%
+                                                    min = .data$Earliest %>%
                                                       substr(4, 5) %>%
                                                       as.numeric(),
                                                     tz = "Pacific/Saipan"),
-                                      Sunrise, units = "mins") %>% as.numeric)
+                                      .data$Sunrise, units = "mins") %>% as.numeric)
 
 
   # Create bins at Quarter level for discretizing time before/after sunrise that the survey began
   strt_yr_qtr_binned <- strt_yr_date %>%
-    mutate(YrQtr = Year + (Qtr-1)*0.25) %>%
-    group_by(YrQtr) %>%
-    summarise(Mean_Sunrise_Diff = mean(Diff_to_Sunrise)) %>%
+    mutate(YrQtr = .data$Year + (.data$Qtr-1)*0.25) %>%
+    group_by(.data$YrQtr) %>%
+    summarise(Mean_Sunrise_Diff = mean(.data$Diff_to_Sunrise)) %>%
     mutate(Mean_Sunrise_Diff_Class = factor(
-      case_when(Mean_Sunrise_Diff < 0 & Mean_Sunrise_Diff > -30 ~ "<30 Before",
-                Mean_Sunrise_Diff <= -30 & Mean_Sunrise_Diff > -200 ~ ">30 Before",
-                Mean_Sunrise_Diff > 0 & Mean_Sunrise_Diff < 30 ~ "<30 After",
-                Mean_Sunrise_Diff >= 30 & Mean_Sunrise_Diff < 200 ~ ">30 After",
+      case_when(.data$Mean_Sunrise_Diff < 0 & .data$Mean_Sunrise_Diff > -30 ~ "<30 Before",
+                .data$Mean_Sunrise_Diff <= -30 & .data$Mean_Sunrise_Diff > -200 ~ ">30 Before",
+                .data$Mean_Sunrise_Diff > 0 & .data$Mean_Sunrise_Diff < 30 ~ "<30 After",
+                .data$Mean_Sunrise_Diff >= 30 & .data$Mean_Sunrise_Diff < 200 ~ ">30 After",
                 TRUE ~ "Not_Recorded")),
-      Mean_Sunrise_Diff = ifelse(Mean_Sunrise_Diff_Class == "Not_Recorded", NA, Mean_Sunrise_Diff))
+      Mean_Sunrise_Diff = ifelse(.data$Mean_Sunrise_Diff_Class == "Not_Recorded", NA, .data$Mean_Sunrise_Diff))
 }
 
 #' Plot start times over time.
@@ -111,11 +111,11 @@ plot_start_times <- function(start_dat) {
   max_yr <- ceiling(max(start_dat$YrQtr))
 
   plt <- start_dat %>%
-    mutate(Qtr = factor((YrQtr-floor(YrQtr))*4+1)) %>%
-    filter(Mean_Sunrise_Diff_Class != "Not_Recorded") %>%
-    ggplot(aes(x = YrQtr, y = Mean_Sunrise_Diff,
-               color = Mean_Sunrise_Diff_Class,
-               shape = Qtr)) +
+    mutate(Qtr = factor((.data$YrQtr-floor(.data$YrQtr))*4+1)) %>%
+    filter(.data$Mean_Sunrise_Diff_Class != "Not_Recorded") %>%
+    ggplot(aes(x = .data$YrQtr, y = .data$Mean_Sunrise_Diff,
+               color = .data$Mean_Sunrise_Diff_Class,
+               shape = .data$Qtr)) +
     geom_point() +
     geom_hline(yintercept = 0, linetype = "dashed") +
     scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1)) +
