@@ -1,8 +1,14 @@
-#' Make pipe available for use
+# Import frequently used operators/functions/packages
 #' @importFrom magrittr %>%
-#' @export
-magrittr::`%>%`
-
+NULL
+#' @importFrom readxl read_xlsx cell_cols
+NULL
+#' @import dplyr
+NULL
+#' @import ggplot2
+NULL
+#' @importFrom rlang .data
+NULL
 
 #' Get rows for each year
 #'
@@ -15,7 +21,7 @@ magrittr::`%>%`
 #' @examples
 get_year_rows <- function(db_file, sheet) {
 
-  all_year <- readxl::read_xlsx(db, sheet = "Rota", range = readxl::cell_cols("A:B"))
+  all_year <- read_xlsx(db_file, sheet = "Rota", range = cell_cols("A:B"))
   # Create row numbers to be trimmed to first occurrence
   all_year$first <- seq(1,nrow(all_year))
   # Find where the changes are
@@ -28,9 +34,9 @@ get_year_rows <- function(db_file, sheet) {
   names(ret) <- c("island", "year", "first", "last")
   # Count cumulative occurrences of each year
   ret <- ret %>%
-         dplyr::group_by(year) %>%
-         dplyr::mutate(occ = 1:dplyr::n(), nocc = dplyr::n()) %>%
-         dplyr::ungroup()
+         group_by(year) %>%
+         mutate(occ = 1:n(), nocc = n()) %>%
+         ungroup()
 
   ret
 }
@@ -50,7 +56,7 @@ get_rows <- function(db_file, db_names, year_range) {
   # Build range string
   rng <- paste0(year_range$island,"!A",year_range$first+1,":R",year_range$last+1)
   # Read from db file
-  ret <- readxl::read_xlsx(db_file, col_names = db_names, range = rng)
+  ret <- read_xlsx(db_file, col_names = db_names, range = rng)
 }
 
 
@@ -101,10 +107,10 @@ fix_date_2021 <- function(dat) {
                            as.Date(dat$Date[which(nchar(dat$Date) == 8)],
                                    format = "%m/%d/%y"))
   Date_fixed <- rbind(fix_len5, fix_len8) %>%
-                dplyr::arrange(idx) %>%
-                dplyr::select(fixed)
+                arrange(.data$idx) %>%
+                select(.data$fixed)
   dat <- dat %>%
-          dplyr::mutate(Date = Date_fixed$fixed)
+          mutate(Date = Date_fixed$fixed)
 }
 
 #' Function to create rows for missing 0's in yr_dat

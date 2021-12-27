@@ -19,45 +19,45 @@ get_observers <- function(all_yrs, yrs) {
       yr_dat <- fix_date_2021(yr_dat)
     }
     obs_dat[[i]] <- yr_dat %>%
-      dplyr::mutate(YrQtr = Year + (lubridate::quarter(Date)-1)*0.25) %>%
-      dplyr::select(YrQtr, Observer, Replicate) %>%
-      dplyr::mutate(Replicate = as.factor(ifelse(is.na(Replicate) | Replicate == 3, 1, Replicate))) %>%
+      mutate(YrQtr = Year + (lubridate::quarter(Date)-1)*0.25) %>%
+      select(YrQtr, Observer, Replicate) %>%
+      mutate(Replicate = as.factor(ifelse(is.na(Replicate) | Replicate == 3, 1, Replicate))) %>%
       unique()
   }
-  obs_dat <- dplyr::bind_rows(obs_dat)
+  obs_dat <- bind_rows(obs_dat)
   # Identify unique observers by initials, breaking up multiples
   # Single initials
   obs_dat_single <- obs_dat[grep("^[[:upper:]]{2,3}$", obs_dat$Observer),]
   # Full names
   obs_dat_full <- obs_dat[grep("^[[:upper:]][^[:upper:]]", obs_dat$Observer),] %>%
-    dplyr::mutate(Observer = gsub("[^[:upper:]]", "", Observer))
+    mutate(Observer = gsub("[^[:upper:]]", "", Observer))
   # Multiple Initials
   obs_dat_mult <- obs_dat[grep("^[[:upper:]]{2,3}\\W", obs_dat$Observer),] %>%
-    dplyr::mutate(Observer = stringr::str_extract_all(Observer,"[[:upper:]]{2,3}")) %>%
+    mutate(Observer = stringr::str_extract_all(Observer,"[[:upper:]]{2,3}")) %>%
     tidyr::unnest(cols = Observer)
   # Recombine initials
-  obs_dat <- dplyr::bind_rows(obs_dat_single,
+  obs_dat <- bind_rows(obs_dat_single,
                        obs_dat_full,
                        obs_dat_mult)
   # Add summary info: chronological order & number of years
   obs_dat <- obs_dat %>%
-    dplyr::left_join(
+    left_join(
       obs_dat %>%
-        dplyr::filter(Observer != "UNK") %>%
-        dplyr::group_by(Observer) %>%
-        dplyr::summarise(start = min(YrQtr)) %>%
-        dplyr::arrange(start) %>%
-        dplyr::mutate(order = dplyr::row_number(), start = NULL) %>%
-        dplyr::bind_rows(data.frame(Observer = "UNK", order = max(.$order)+1)),
+        filter(Observer != "UNK") %>%
+        group_by(Observer) %>%
+        summarise(start = min(YrQtr)) %>%
+        arrange(start) %>%
+        mutate(order = row_number(), start = NULL) %>%
+        bind_rows(data.frame(Observer = "UNK", order = max(.$order)+1)),
       by = "Observer"
     ) %>%
-    dplyr::left_join(
+    left_join(
       obs_dat %>%
-        dplyr::group_by(Observer) %>%
-        dplyr::summarise(nyrs = dplyr::n()),
+        group_by(Observer) %>%
+        summarise(nyrs = n()),
       by = "Observer"
     ) %>%
-    dplyr::arrange(order)
+    arrange(order)
 }
 
 
@@ -75,29 +75,29 @@ plot_observers <- function(obs_dat, filter_obs = FALSE) {
   max_yr <- ceiling(max(obs_dat$YrQtr))
   if(filter_obs) {
     plt <- obs_dat %>%
-            dplyr::filter(nyrs>1) %>%
-            dplyr::mutate(Qtr = factor((YrQtr-floor(YrQtr))*4+1)) %>%
-            ggplot2::ggplot(ggplot2::aes(y = stats::reorder(Observer, order), x = YrQtr)) +
-            ggplot2::geom_point(ggplot2::aes(shape = Qtr, color = Replicate)) +
-            ggplot2::geom_line(linetype = "dotted") +
-            ggplot2::scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1)) +
-            ggplot2::scale_color_manual(values = c("black","red")) +
-            ggplot2::labs(y = "Observer (>1 Survey)",
+            filter(nyrs>1) %>%
+            mutate(Qtr = factor((YrQtr-floor(YrQtr))*4+1)) %>%
+            ggplot(aes(y = stats::reorder(Observer, order), x = YrQtr)) +
+            geom_point(aes(shape = Qtr, color = Replicate)) +
+            geom_line(linetype = "dotted") +
+            scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1)) +
+            scale_color_manual(values = c("black","red")) +
+            labs(y = "Observer (>1 Survey)",
                        shape = "Quarter") +
-            ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+            theme(axis.title.x = element_blank(),
                         legend.position = c(.1, .75),
                         legend.box = "horizontal")
   } else {
     plt <- obs_dat %>%
-      dplyr::mutate(Qtr = factor((YrQtr-floor(YrQtr))*4+1)) %>%
-      ggplot2::ggplot(ggplot2::aes(y = stats::reorder(Observer, order), x = YrQtr)) +
-      ggplot2::geom_point(ggplot2::aes(shape = Qtr, color = Replicate)) +
-      ggplot2::geom_line(linetype = "dotted") +
-      ggplot2::scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1)) +
-      ggplot2::scale_color_manual(values = c("black","red")) +
-      ggplot2::labs(y = "Observer",
+      mutate(Qtr = factor((YrQtr-floor(YrQtr))*4+1)) %>%
+      ggplot(aes(y = stats::reorder(Observer, order), x = YrQtr)) +
+      geom_point(aes(shape = Qtr, color = Replicate)) +
+      geom_line(linetype = "dotted") +
+      scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1)) +
+      scale_color_manual(values = c("black","red")) +
+      labs(y = "Observer",
                     shape = "Quarter") +
-      ggplot2::theme(axis.title.x = ggplot2::element_blank(),
+      theme(axis.title.x = element_blank(),
                      legend.position = c(.1, .75),
                      legend.box = "horizontal")
   }
