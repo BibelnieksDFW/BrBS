@@ -7,48 +7,48 @@ magrittr::`%>%`
 #' Get rows for each year
 #'
 #' @param db_file Path to the BBS .xlsx database file.
-#' @param sheets Sheet to read. Either string with island name or integer.
+#' @param sheet Sheet to read. Either string with island name or integer.
 #'
 #' @return Dataframe with island, year, and first/last rows in Excel sheet corresponding to that year.
 #' @export
 #'
 #' @examples
-get_year_rows <- function(db_file, sheets) {
-  year_ranges <- data.frame()
-  for(sheet in sheets) {
-    # Read in first 2 columns to get island and years
-    all_year <- readxl::read_xlsx(db_file, sheet = sheet, range = readxl::cell_cols("A:B"))
-    # Find first and last rows for each
-    last <- length(all_year$Year)-match(unique(all_year$Year),rev(all_year$Year))+1
-    first <- c(1,last[1:(length(last)-1)]+1)
-    # Create return df
-    year_ranges <- rbind(year_ranges, data.frame(island = all_year$Island[1],
-                                                 year = unique(all_year$Year),
-                                                 first = first, last = last))
-  }
-  return(year_ranges)
+get_year_rows <- function(db_file, sheet) {
+
+  all_year <- readxl::read_xlsx(db, sheet = "Rota", range = readxl::cell_cols("A:B"))
+  # Create row numbers to be trimmed to first occurrence
+  all_year$first <- seq(1,nrow(all_year))
+  # Find where the changes are
+  yrDiff <- all_year$Year-c(0,all_year$Year[1:nrow(all_year)-1])
+  # Start building return df by trimming to changes
+  ret <- all_year[which(yrDiff!=0),]
+  # Get last by subtracting 1 from next first
+  ret$last <- c(ret$first[2:nrow(ret)]-1, all_year$first[nrow(all_year)])
+  # Set names to lowercase
+  names(ret) <- c("island", "year", "first", "last")
+  # Count cumulative occurrences of each year
+  ret <- ret %>%
+         dplyr::group_by(year) %>%
+         dplyr::mutate(occ = 1:dplyr::n(), nocc = dplyr::n()) %>%
+         dplyr::ungroup()
+
+  ret
 }
 
 
-#' Read data for a given island and year
+#' Read rows from database. Used to retrieve contiguous survey segments
 #'
 #' @param db_file Path to the BBS .xlsx database file.
 #' @param db_names Column names in BBS database file.
-#' @param year_ranges Dataframe of the kind returned by get_year_rows.
-#' @param isl One of "Saipan", "Rota", "Tinian".
-#' @param yr Year to retrieve as an integer.
+#' @param year_range Dataframe with 1 row of from get_year_rows. Specifies island, year, and corresponding rows in database file.
 #'
 #' @return Dataframe containing BBS observations from that island and year.
 #' @export
 #'
 #' @examples
-get_island_year <- function(db_file, db_names, year_ranges, isl, yr) {
-  # Get first and last rows
-  rows <- year_ranges %>%
-    dplyr::filter(island == isl, year == yr) %>%
-    dplyr::select(first, last)
+get_rows <- function(db_file, db_names, year_range) {
   # Build range string
-  rng <- paste0(isl,"!A",rows$first+1,":R",rows$last+1)
+  rng <- paste0(year_range$island,"!A",year_range$first+1,":R",year_range$last+1)
   # Read from db file
   ret <- readxl::read_xlsx(db_file, col_names = db_names, range = rng)
 }
@@ -67,12 +67,17 @@ get_island_year <- function(db_file, db_names, year_ranges, isl, yr) {
 #' @examples
 get_island_year_list <- function(db_file, db_names, year_ranges, isl) {
   yr_dat_list <- list()
-  for(i in seq_along(year_ranges$year)) {
-    yr <- year_ranges$year[i]
-    yr_dat_list[[i]] <- get_island_year(db_file, db_names, year_ranges, isl, yr)
-    print(sprintf("Year %d complete", yr))
+  for(i in 1:nrow(year_ranges)) {
+    yr_dat_list[[i]] <- get_rows(db_file, db_names, year_ranges[i,])
+    print(sprintf("Year %d (%d/%d) ",
+                  year_ranges$year[i],
+                  year_ranges$occ[i],
+                  year_ranges$nocc[i]
+                  )
+          )
   }
-  return(yr_dat_list)
+
+  yr_dat_list
 }
 
 

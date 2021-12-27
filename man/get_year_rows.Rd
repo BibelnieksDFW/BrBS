@@ -4,12 +4,12 @@
 \alias{get_year_rows}
 \title{Get rows for each year}
 \usage{
-get_year_rows(db_file, sheets)
+get_year_rows(db_file, sheet)
 }
 \arguments{
 \item{db_file}{Path to the BBS .xlsx database file.}
 
-\item{sheets}{Sheet to read. Either string with island name or integer.}
+\item{sheet}{Sheet to read. Either string with island name or integer.}
 }
 \value{
 Dataframe with island, year, and first/last rows in Excel sheet corresponding to that year.
