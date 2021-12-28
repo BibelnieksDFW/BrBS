@@ -4,12 +4,10 @@
 \alias{get_survey_start_times}
 \title{Gather survey start times to use in relation to sunrise as a covariate}
 \usage{
-get_survey_start_times(all_yrs, yrs, isl)
+get_survey_start_times(all_yrs, isl)
 }
 \arguments{
 \item{all_yrs}{List of dataframes produced by get_island_year_list.}
-
-\item{yrs}{Numeric vector of years to pull from all_yrs}
 
 \item{isl}{One of "Saipan", "Rota", "Tinian".}
 }

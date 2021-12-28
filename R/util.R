@@ -21,7 +21,7 @@ NULL
 #' @examples
 get_year_rows <- function(db_file, sheet) {
 
-  all_year <- read_xlsx(db_file, sheet = "Rota", range = cell_cols("A:B"))
+  all_year <- read_xlsx(db_file, sheet = sheet, range = cell_cols("A:B"))
   # Create row numbers to be trimmed to first occurrence
   all_year$first <- seq(1,nrow(all_year))
   # Find where the changes are
@@ -75,7 +75,7 @@ get_island_year_list <- function(db_file, db_names, year_ranges, isl) {
   yr_dat_list <- list()
   for(i in 1:nrow(year_ranges)) {
     yr_dat_list[[i]] <- get_rows(db_file, db_names, year_ranges[i,])
-    print(sprintf("Year %d (%d/%d) ",
+    print(sprintf("Year %d Read (%d/%d) ",
                   year_ranges$year[i],
                   year_ranges$occ[i],
                   year_ranges$nocc[i]
@@ -85,6 +85,83 @@ get_island_year_list <- function(db_file, db_names, year_ranges, isl) {
 
   yr_dat_list
 }
+
+
+#' Clean and combine list from get_island_year_list into one dataframe.
+#'
+#' @param all_yrs List from get_island_year_list
+#'
+#' @return Dataframe from combining entries of all_yrs list, with additional column YrQtr
+#' @export
+#'
+#' @examples
+year_list_to_df <- function(all_yrs) {
+  for(i in 1:length(all_yrs)) {
+    yr_dat <- all_yrs[[i]]
+    # Check if Date still needs to be type-corrected
+    if(!lubridate::is.POSIXct(yr_dat$Date)) {
+      yr_dat <- fix_date(yr_dat)
+    }
+    # Format Start to %H:%M string
+    if(lubridate::is.POSIXct(yr_dat$Start)) {
+      yr_dat <- yr_dat %>%
+        mutate(Start = format(.data$Start, "%H:%M"))
+    } else if(is.character(yr_dat$Start) &
+              length(grep("[:digit:]*:[:digit:]*",yr_dat$Start)) != length(yr_dat$Start)) {
+      # Don't change any that are already ok
+      ok <- data.frame(idx = grep("[:digit:]*:[:digit:]*",yr_dat$Start),
+                       fixed = yr_dat$Start[grep("[:digit:]*:[:digit:]*",yr_dat$Start)])
+      # Whatever read in as numbers needs to be reformatted
+      need_fix <- data.frame(idx = grep("0\\.[:digit:]*",yr_dat$Start),
+                             fixed = (yr_dat$Start[grep("0\\.[:digit:]*",yr_dat$Start)] %>%
+                                        as.numeric() * 86400) %>%
+                               as.POSIXct(origin = "1899-12-30", tz = "UTC") %>%
+                               format("%H:%M"))
+
+
+      Start_fixed <- rbind(ok, need_fix) %>%
+        arrange(.data$idx) %>%
+        select(.data$fixed)
+      yr_dat <- yr_dat %>%
+        mutate(Start = as.character(Start_fixed$fixed))
+    }
+
+    yr_dat <- yr_dat %>%
+              mutate(Station = as.character(.data$Station),
+                     YrQtr = .data$Year + (lubridate::quarter(.data$Date)-1)*0.25,
+                     # Add replicate column if not already present (matters for observers)
+                     Replicate = ifelse("Replicate" %in% names(yr_dat),
+                                        yes = as.factor(ifelse(is.na(.data$Replicate) |
+                                                                 .data$Replicate == 3,
+                                                              yes = 1,
+                                                              no = .data$Replicate)),
+                                        no = 1)
+                     ) %>%
+              select(.data$Island,
+                     .data$YrQtr,
+                     .data$Year,
+                     .data$Observer,
+                     .data$Station,
+                     .data$X,
+                     .data$Y,
+                     .data$Date,
+                     .data$Start,
+                     .data$Species_Code,
+                     .data$Count,
+                     .data$Replicate
+                     )
+    all_yrs[[i]] <- yr_dat
+    print(sprintf("%d complete (%d/%d)",
+                  floor(min(yr_dat$YrQtr)),
+                  i,
+                  length(all_yrs)
+          )
+    )
+  }
+  # All years should now have same format - bind into df and return
+  bind_rows(all_yrs)
+}
+
 
 
 #' Format dates that aren't already of the standard forms "%Y-%m-%d" or "%Y/%m/%d"

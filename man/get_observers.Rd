@@ -4,12 +4,10 @@
 \alias{get_observers}
 \title{Gather observers over time}
 \usage{
-get_observers(all_yrs, yrs)
+get_observers(all_yrs)
 }
 \arguments{
 \item{all_yrs}{List of dataframes produced by get_island_year_list.}
-
-\item{yrs}{Numeric vector of years to pull from all_yrs}
 }
 \value{
 Dataframe with year-quarter, observer's initials, chronological order, and number of surveys conducted.

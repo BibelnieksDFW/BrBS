@@ -1,21 +1,18 @@
 #' Gather observers over time
 #'
 #' @param all_yrs List of dataframes produced by get_island_year_list.
-#' @param yrs Numeric vector of years to pull from all_yrs
 #'
 #' @return Dataframe with year-quarter, observer's initials, chronological order, and number of surveys conducted.
 #' @export
 #'
 #' @examples
-get_observers <- function(all_yrs, yrs) {
-  # all_yrs=all_yrs;yrs=year_ranges_Saipan$year; i=22
+get_observers <- function(all_yrs) {
   # Get observers for every year-quarter
   obs_dat <- list()
-  for(i in seq_along(yrs)) {
-    yr <- yrs[i]
+  for(i in 1:length(all_yrs)) {
     yr_dat <- all_yrs[[i]]
     # Fix date column for 2021
-    if(yr == 2021) {
+    if(!lubridate::is.POSIXct(yr_dat$Date)) {
       yr_dat <- fix_date(yr_dat)
     }
     obs_dat[[i]] <- yr_dat %>%

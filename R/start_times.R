@@ -1,21 +1,19 @@
 #' Gather survey start times to use in relation to sunrise as a covariate
 #'
 #' @param all_yrs List of dataframes produced by get_island_year_list.
-#' @param yrs Numeric vector of years to pull from all_yrs
 #' @param isl One of "Saipan", "Rota", "Tinian".
 #'
 #' @return Dataframe with year-quarter, start time in minutes from sunrise, and bins for more/less than 30 minutes before/after sunrise
 #' @export
 #'
 #' @examples
-get_survey_start_times <- function(all_yrs, yrs, isl) {
+get_survey_start_times <- function(all_yrs, isl) {
   strt_yr_date <- list()
-  for(i in seq_along(yrs)) {
-    yr <- yrs[i]
+  for(i in 1:length(all_yrs)) {
     yr_dat <- all_yrs[[i]]
 
     # Fix date column for 2021
-    if(yr == 2021) {
+    if(!lubridate::is.POSIXct(yr_dat$Date)) {
       yr_dat <- fix_date(yr_dat)
     }
 
@@ -53,7 +51,7 @@ get_survey_start_times <- function(all_yrs, yrs, isl) {
       group_by(.data$Year, .data$Month, .data$Day) %>%
       summarise(N_Stations = n(), Earliest = min(.data$Start)) %>%
       mutate(Qtr = ceiling(.data$Month/3))
-    print(sprintf("Year %d complete", yr))
+    print(sprintf("Year %d complete", yr_dat$Year))
   }
   strt_yr_date <- dplyr::bind_rows(strt_yr_date)
 
