@@ -173,17 +173,23 @@ year_list_to_df <- function(all_yrs) {
 #'
 #' @examples
 fix_date <- function(dat) {
-  fix_len5 <- data.frame(idx = which(nchar(dat$Date) == 5),
+  # Identify forms of date strings
+  # Numeric - number of days since Excel's weird origin
+  num_idx <- grep("^[[:digit:]]*$", dat$Date)
+  # Out of standard order - %m/%d/%Y
+  slash_idx <- grep("[[:digit:]]{1,2}/[[:digit:]]{1,2}/[[:digit:]]{2,4}", dat$Date)
+
+  fix_num <- data.frame(idx = num_idx,
                          fixed =
                            # For the ones that are numbers count days from Excel's weird origin - 12/30/1899
-                           as.Date(as.numeric(dat$Date[which(nchar(dat$Date) == 5)]),
+                           as.Date(as.numeric(dat$Date[num_idx]),
                                    origin = "1899-12-30"))
-  fix_len8 <- data.frame(idx = which(nchar(dat$Date) == 8),
+  fix_slash <- data.frame(idx = slash_idx,
                          fixed =
                            # For the almost date ones, it's real easy to get them there
-                           as.Date(dat$Date[which(nchar(dat$Date) == 8)],
+                           as.Date(dat$Date[slash_idx],
                                    format = "%m/%d/%y"))
-  Date_fixed <- rbind(fix_len5, fix_len8) %>%
+  Date_fixed <- rbind(fix_num, fix_slash) %>%
                 arrange(.data$idx) %>%
                 select(.data$fixed)
   dat <- dat %>%
