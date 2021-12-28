@@ -11,7 +11,8 @@ get_observers <- function(bbs_dat) {
   obs_dat <- bbs_dat %>%
               mutate(Replicate = as.factor(.data$Replicate)) %>%
               select(.data$YrQtr, .data$Observer, .data$Replicate) %>%
-              unique()
+              unique() %>%
+              mutate(Observer = gsub("\\.", "", .data$Observer))
 
   # Identify unique observers by initials, breaking up multiples
   # Single initials
@@ -23,10 +24,15 @@ get_observers <- function(bbs_dat) {
   obs_dat_mult <- obs_dat[grep("^[[:upper:]]{2,3}\\W", obs_dat$Observer),] %>%
     mutate(Observer = stringr::str_extract_all(.data$Observer,"[[:upper:]]{2,3}")) %>%
     tidyr::unnest(cols = .data$Observer)
-  # Recombine initials
+  # Recombine initials, collapse 3-letter initials to 2-letter
   obs_dat <- bind_rows(obs_dat_single,
                        obs_dat_full,
-                       obs_dat_mult)
+                       obs_dat_mult) %>%
+             mutate(Observer = ifelse(nchar(.data$Observer)==3 &
+                                        .data$Observer != "UNK",
+                                      yes = paste0(substr(.data$Observer,1,1),
+                                             substr(.data$Observer,3,3)),
+                                      no = .data$Observer))
   # Add summary info: chronological order & number of years
   obs_dat <- obs_dat %>%
     left_join(
@@ -36,7 +42,7 @@ get_observers <- function(bbs_dat) {
         summarise(start = min(.data$YrQtr)) %>%
         arrange(.data$start) %>%
         mutate(order = row_number(), start = NULL) %>%
-        bind_rows(data.frame(Observer = "UNK", order = max(.data$order)+1)),
+        bind_rows(data.frame(Observer = "UNK", order = Inf)),
       by = "Observer"
     ) %>%
     left_join(
