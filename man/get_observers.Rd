@@ -4,10 +4,10 @@
 \alias{get_observers}
 \title{Gather observers over time}
 \usage{
-get_observers(all_yrs)
+get_observers(bbs_dat)
 }
 \arguments{
-\item{all_yrs}{List of dataframes produced by get_island_year_list.}
+\item{bbs_dat}{Dataframe with BBS data. Must have columns YrQtr, Observer, and Replicate}
 }
 \value{
 Dataframe with year-quarter, observer's initials, chronological order, and number of surveys conducted.

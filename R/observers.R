@@ -1,27 +1,18 @@
 #' Gather observers over time
 #'
-#' @param all_yrs List of dataframes produced by get_island_year_list.
+#' @param bbs_dat Dataframe with BBS data. Must have columns YrQtr, Observer, and Replicate
 #'
 #' @return Dataframe with year-quarter, observer's initials, chronological order, and number of surveys conducted.
 #' @export
 #'
 #' @examples
-get_observers <- function(all_yrs) {
+get_observers <- function(bbs_dat) {
   # Get observers for every year-quarter
-  obs_dat <- list()
-  for(i in 1:length(all_yrs)) {
-    yr_dat <- all_yrs[[i]]
-    # Fix date column for 2021
-    if(!lubridate::is.POSIXct(yr_dat$Date)) {
-      yr_dat <- fix_date(yr_dat)
-    }
-    obs_dat[[i]] <- yr_dat %>%
-      mutate(YrQtr = .data$Year + (lubridate::quarter(.data$Date)-1)*0.25) %>%
-      select(.data$YrQtr, .data$Observer, .data$Replicate) %>%
-      mutate(Replicate = as.factor(ifelse(is.na(.data$Replicate) | .data$Replicate == 3, 1, .data$Replicate))) %>%
-      unique()
-  }
-  obs_dat <- bind_rows(obs_dat)
+  obs_dat <- bbs_dat %>%
+              mutate(Replicate = as.factor(.data$Replicate)) %>%
+              select(.data$YrQtr, .data$Observer, .data$Replicate) %>%
+              unique()
+
   # Identify unique observers by initials, breaking up multiples
   # Single initials
   obs_dat_single <- obs_dat[grep("^[[:upper:]]{2,3}$", obs_dat$Observer),]

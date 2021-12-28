@@ -1,89 +1,47 @@
 #' Gather survey start times to use in relation to sunrise as a covariate
 #'
-#' @param all_yrs List of dataframes produced by get_island_year_list.
-#' @param isl One of "Saipan", "Rota", "Tinian".
+#' @param bbs_dat Dataframe with BBS data. Must have columns Year, Station, Date,
 #'
 #' @return Dataframe with year-quarter, start time in minutes from sunrise, and bins for more/less than 30 minutes before/after sunrise
 #' @export
 #'
 #' @examples
-get_survey_start_times <- function(all_yrs, isl) {
-  strt_yr_date <- list()
-  for(i in 1:length(all_yrs)) {
-    yr_dat <- all_yrs[[i]]
+get_survey_start_times <- function(bbs_dat) {
+  strt_yr_date <- bbs_dat %>%
+    mutate(Date = .data$Date) %>%
+    select(.data$Date, .data$Start) %>%
+    unique() %>%
+    group_by(.data$Date) %>%
+    summarise(Earliest = min(.data$Start))
 
-    # Fix date column for 2021
-    if(!lubridate::is.POSIXct(yr_dat$Date)) {
-      yr_dat <- fix_date(yr_dat)
-    }
-
-    # Fix formatting of Start to just %H:%M
-    if(lubridate::is.POSIXct(yr_dat$Start)) {
-      yr_dat <- yr_dat %>%
-                mutate(Start = format(.data$Start, "%H:%M"))
-    } else if(is.character(yr_dat$Start) &
-              length(grep("[:digit:]*:[:digit:]*",yr_dat$Start)) != length(yr_dat$Start)) {
-      # Don't change any that are already ok
-      ok <- data.frame(idx = grep("[:digit:]*:[:digit:]*",yr_dat$Start),
-                       fixed = yr_dat$Start[grep("[:digit:]*:[:digit:]*",yr_dat$Start)])
-      # Whatever read in as numbers needs to be reformatted
-      need_fix <- data.frame(idx = grep("0\\.[:digit:]*",yr_dat$Start),
-                             fixed = (yr_dat$Start[grep("0\\.[:digit:]*",yr_dat$Start)] %>%
-                                        as.numeric() * 86400) %>%
-                               as.POSIXct(origin = "1899-12-30", tz = "UTC") %>%
-                               format("%H:%M"))
-
-
-      Start_fixed <- rbind(ok, need_fix) %>%
-                      arrange(.data$idx) %>%
-                      select(.data$fixed)
-      yr_dat <- yr_dat %>%
-                 mutate(Start = as.character(Start_fixed$fixed))
-    }
-
-
-
-    strt_yr_date[[i]] <- yr_dat %>%
-      mutate(Month = lubridate::month(.data$Date),
-             Day = lubridate::day(.data$Date)) %>%
-      select(.data$Year, .data$Station, .data$Month, .data$Day, .data$Start) %>%
-      unique() %>%
-      group_by(.data$Year, .data$Month, .data$Day) %>%
-      summarise(N_Stations = n(), Earliest = min(.data$Start)) %>%
-      mutate(Qtr = ceiling(.data$Month/3))
-    print(sprintf("Year %d complete", yr_dat$Year))
-  }
-  strt_yr_date <- dplyr::bind_rows(strt_yr_date)
 
   # Get island lat/long
+  isl <- bbs_dat$Island[1]
 
   isl_lat <- case_when(isl == "Saipan" ~ 15.183,
-                       isl == "Rota" ~ 15.183,
-                       isl == "Tinian" ~ 15.183)
+                       isl == "Rota" ~ 14.1509,
+                       isl == "Tinian" ~ 15.0043)
   isl_long <- case_when(isl == "Saipan" ~ 145.75,
-                        isl == "Rota" ~ 15.183,
-                        isl == "Tinian" ~ 15.183)
+                        isl == "Rota" ~ 145.2149,
+                        isl == "Tinian" ~ 145.6357)
 
   # Add in sunrise times
   strt_yr_date <- strt_yr_date %>%
-    mutate(Sunrise = suncalc::getSunlightTimes(date = lubridate::make_date(.data$Year, .data$Month, .data$Day),
+    mutate(Sunrise = suncalc::getSunlightTimes(date = as.Date(.data$Date),
                                       lat = isl_lat,
                                       lon = isl_long,
-                                      keep = "sunrise", tz = "Pacific/Saipan") %>% .data$sunrise,
-           Diff_to_Sunrise = difftime(lubridate::make_datetime(.data$Year, .data$Month, .data$Day,
-                                                    hour = .data$Earliest %>%
-                                                      substr(1, 2) %>%
-                                                      as.numeric(),
-                                                    min = .data$Earliest %>%
-                                                      substr(4, 5) %>%
-                                                      as.numeric(),
-                                                    tz = "Pacific/Saipan"),
+                                      keep = "sunrise",
+                                      tz = "Pacific/Saipan") %>%
+                      select(.data$sunrise) %>%
+                      pull(),
+           Diff_to_Sunrise = difftime(as.POSIXct(paste(.data$Date, .data$Earliest),
+                                                            format = "%Y-%m-%d %H:%M"),
                                       .data$Sunrise, units = "mins") %>% as.numeric)
 
 
   # Create bins at Quarter level for discretizing time before/after sunrise that the survey began
   strt_yr_qtr_binned <- strt_yr_date %>%
-    mutate(YrQtr = .data$Year + (.data$Qtr-1)*0.25) %>%
+    mutate(YrQtr = lubridate::year(.data$Date) + (lubridate::quarter(.data$Date)-1)*0.25) %>%
     group_by(.data$YrQtr) %>%
     summarise(Mean_Sunrise_Diff = mean(.data$Diff_to_Sunrise)) %>%
     mutate(Mean_Sunrise_Diff_Class = factor(

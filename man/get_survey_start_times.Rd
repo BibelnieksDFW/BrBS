@@ -4,12 +4,10 @@
 \alias{get_survey_start_times}
 \title{Gather survey start times to use in relation to sunrise as a covariate}
 \usage{
-get_survey_start_times(all_yrs, isl)
+get_survey_start_times(bbs_dat)
 }
 \arguments{
-\item{all_yrs}{List of dataframes produced by get_island_year_list.}
-
-\item{isl}{One of "Saipan", "Rota", "Tinian".}
+\item{bbs_dat}{Dataframe with BBS data. Must have columns Year, Station, Date,}
 }
 \value{
 Dataframe with year-quarter, start time in minutes from sunrise, and bins for more/less than 30 minutes before/after sunrise

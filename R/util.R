@@ -151,7 +151,7 @@ year_list_to_df <- function(all_yrs) {
                      .data$Replicate
                      )
     all_yrs[[i]] <- yr_dat
-    print(sprintf("%d complete (%d/%d)",
+    print(sprintf("%d Cleaned (%d/%d)",
                   floor(min(yr_dat$YrQtr)),
                   i,
                   length(all_yrs)
