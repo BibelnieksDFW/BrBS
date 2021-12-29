@@ -4,12 +4,12 @@
 \alias{plot_bird_count}
 \title{Create plot for individual bird.}
 \usage{
-plot_bird_count(bird, bdat)
+plot_bird_count(bird, bbs_dat)
 }
 \arguments{
 \item{bird}{String for Species_Code found in bdat.}
 
-\item{bdat}{BBS dataframe with data for 'bird' Species_Code. May have more as well, intended to be passed through lapply in plot_counts.}
+\item{bbs_dat}{BBS dataframe with data for 'bird' Species_Code. May have more as well, intended to be passed through lapply in plot_counts.}
 }
 \value{
 ggplot of counts over time for bird.

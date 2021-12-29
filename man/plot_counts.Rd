@@ -2,7 +2,7 @@
 % Please edit documentation in R/species_counts.R
 \name{plot_counts}
 \alias{plot_counts}
-\title{Create plots}
+\title{Create plots for multiple bird species. If no species specified, plot for all available.}
 \usage{
 plot_counts(bbs_dat, birds = c())
 }
@@ -15,5 +15,5 @@ plot_counts(bbs_dat, birds = c())
 List of ggplots for each bird species in birds.
 }
 \description{
-Create plots
+Create plots for multiple bird species. If no species specified, plot for all available.
 }
