@@ -5,7 +5,6 @@
 #' @return Dataframe with year-quarter, start time in minutes from sunrise, and bins for more/less than 30 minutes before/after sunrise
 #' @export
 #'
-#' @examples
 get_survey_start_times <- function(bbs_dat) {
   strt_yr_date <- bbs_dat %>%
     mutate(Date = .data$Date) %>%
@@ -60,7 +59,6 @@ get_survey_start_times <- function(bbs_dat) {
 #' @return Plot of start times over time.
 #' @export
 #'
-#' @examples
 plot_start_times <- function(start_dat) {
 
   min_yr <- floor(min(start_dat$YrQtr))

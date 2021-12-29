@@ -18,7 +18,6 @@ NULL
 #' @return Dataframe with island, year, and first/last rows in Excel sheet corresponding to that year.
 #' @export
 #'
-#' @examples
 get_year_rows <- function(db_file, sheet) {
 
   all_year <- read_xlsx(db_file, sheet = sheet, range = cell_cols("A:B"))
@@ -51,7 +50,6 @@ get_year_rows <- function(db_file, sheet) {
 #' @return Dataframe containing BBS observations from that island and year.
 #' @export
 #'
-#' @examples
 get_rows <- function(db_file, db_names, year_range) {
   # Build range string
   rng <- paste0(year_range$island,"!A",year_range$first+1,":R",year_range$last+1)
@@ -70,7 +68,6 @@ get_rows <- function(db_file, db_names, year_range) {
 #' @return List where each entry is a dataframe with yearly data for that island.
 #' @export
 #'
-#' @examples
 get_island_year_list <- function(db_file, db_names, year_ranges, isl) {
   yr_dat_list <- list()
   for(i in 1:nrow(year_ranges)) {
@@ -94,7 +91,6 @@ get_island_year_list <- function(db_file, db_names, year_ranges, isl) {
 #' @return Dataframe from combining entries of all_yrs list, with additional column YrQtr
 #' @export
 #'
-#' @examples
 year_list_to_df <- function(all_yrs) {
   for(i in 1:length(all_yrs)) {
     yr_dat <- all_yrs[[i]]
@@ -171,7 +167,6 @@ year_list_to_df <- function(all_yrs) {
 #' @return Same dataframe as input, but correctly formatted date column
 #' @export
 #'
-#' @examples
 fix_date <- function(dat) {
   # Identify forms of date strings
   # Numeric - number of days since Excel's weird origin
@@ -212,7 +207,6 @@ fix_date <- function(dat) {
 #' @return Dataframe with new rows for adding into BBS dataframe.
 #' @export
 #'
-#' @examples
 create_spec_count_rows <- function(Island = NA, Year = NA,
                                    Observer = "UNK", Station = NA,
                                    X = NA, Y = NA, Date = NA, Start = NA,

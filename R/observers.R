@@ -5,7 +5,6 @@
 #' @return Dataframe with year-quarter, observer's initials, chronological order, and number of surveys conducted.
 #' @export
 #'
-#' @examples
 get_observers <- function(bbs_dat) {
   # Get observers for every year-quarter
   obs_dat <- bbs_dat %>%
@@ -63,7 +62,6 @@ get_observers <- function(bbs_dat) {
 #' @return Plot of observers over time.
 #' @export
 #'
-#' @examples
 plot_observers <- function(obs_dat, filter_obs = FALSE) {
   min_yr <- floor(min(obs_dat$YrQtr))
   max_yr <- ceiling(max(obs_dat$YrQtr))
