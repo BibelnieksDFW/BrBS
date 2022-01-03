@@ -27,12 +27,15 @@ islandwide_counts <- function(bbs_dat) {
 plot_bird_count <- function(bird, bbs_dat) {
   # Get the specific bird
   bdat <- bbs_dat %>% filter(.data$Species_Code == bird)
+  min_yr <- floor(min(bdat$YrQtr))
+  max_yr <- ceiling(max(bdat$YrQtr))
   # Make basic plot
   plt <- bdat %>%
          ggplot(aes(x = .data$YrQtr, y = .data$Count)) +
          geom_point() +
          geom_line() +
-         labs(title = bird)
+         labs(title = bird) +
+         scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1))
   # If more than 10 counts available, add a loess trend line
   if(nrow(bdat) > 10) {
     plt <- plt + geom_smooth(color = "red", method = "loess", formula = y ~ x)
