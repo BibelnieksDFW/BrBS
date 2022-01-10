@@ -4,12 +4,10 @@
 \alias{get_island_year_list}
 \title{Get all years for an island and store as a list - avoid slow re-reading from Excel}
 \usage{
-get_island_year_list(db_file, db_names, year_ranges, isl)
+get_island_year_list(db_file, year_ranges, isl)
 }
 \arguments{
 \item{db_file}{Path to the BBS .xlsx database file.}
-
-\item{db_names}{Column names in BBS database file.}
 
 \item{year_ranges}{Dataframe of the kind returned by get_year_rows.}
 

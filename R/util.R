@@ -61,14 +61,16 @@ get_rows <- function(db_file, db_names, year_range) {
 #' Get all years for an island and store as a list - avoid slow re-reading from Excel
 #'
 #' @param db_file Path to the BBS .xlsx database file.
-#' @param db_names Column names in BBS database file.
 #' @param year_ranges Dataframe of the kind returned by get_year_rows.
 #' @param isl One of "Saipan", "Rota", "Tinian".
 #'
 #' @return List where each entry is a dataframe with yearly data for that island.
 #' @export
 #'
-get_island_year_list <- function(db_file, db_names, year_ranges, isl) {
+get_island_year_list <- function(db_file, year_ranges, isl) {
+  # Get column names from first row of sheet
+  db_names <- names(read_xlsx(db_file, sheet = isl, n_max = 1))
+  # Start reading in rows in year-batches
   yr_dat_list <- list()
   for(i in 1:nrow(year_ranges)) {
     yr_dat_list[[i]] <- get_rows(db_file, db_names, year_ranges[i,])

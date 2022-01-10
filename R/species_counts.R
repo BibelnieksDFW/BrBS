@@ -33,13 +33,19 @@ plot_bird_count <- function(bird, bbs_dat) {
   plt <- bdat %>%
          ggplot(aes(x = .data$YrQtr, y = .data$Count)) +
          geom_point() +
-         geom_line() +
          labs(title = bird) +
-         scale_x_continuous(breaks = seq(min_yr, max_yr, 5), minor_breaks = seq(min_yr,max_yr,1))
-  # If more than 10 counts available, add a loess trend line
-  if(nrow(bdat) > 10) {
-    plt <- plt + geom_smooth(color = "red", method = "loess", formula = y ~ x)
+         scale_x_continuous(limits = c(min_yr, max_yr),
+                            breaks = seq(min_yr, max_yr, 5),
+                            minor_breaks = seq(min_yr,max_yr,1))
+  # Only connect the dots if more than one count
+  if(nrow(bdat) > 1) {
+    plt <- plt + geom_line()
+    # If more than 10 counts available, add a loess trend line
+    if(nrow(bdat) > 10) {
+      plt <- plt + geom_smooth(color = "red", method = "loess", formula = y ~ x)
+    }
   }
+
 
   plt
 }
