@@ -123,17 +123,22 @@ year_list_to_df <- function(all_yrs) {
       yr_dat <- yr_dat %>%
         mutate(Start = as.character(Start_fixed$fixed))
     }
-
+    # Create or clean up Replicate column
+    if("Replicate" %in% names(yr_dat)) {
+      # Change NA or 3 (code for partial survey) to 1
+      yr_dat <- yr_dat %>%
+        mutate( Replicate = as.factor(ifelse(is.na(.data$Replicate) |
+                                               .data$Replicate == 3,
+                                             yes = 1,
+                                             no = .data$Replicate)))
+    } else {
+      # If there isn't a Replicate column, make one
+      yr_dat <- yr_dat %>%
+        mutate(Replicate = factor(1, levels = c(1,2)))
+    }
     yr_dat <- yr_dat %>%
               mutate(Station = as.character(.data$Station),
-                     YrQtr = .data$Year + (lubridate::quarter(.data$Date)-1)*0.25,
-                     # Add replicate column if not already present (matters for observers)
-                     Replicate = ifelse("Replicate" %in% names(yr_dat),
-                                        yes = as.factor(ifelse(is.na(.data$Replicate) |
-                                                                 .data$Replicate == 3,
-                                                              yes = 1,
-                                                              no = .data$Replicate)),
-                                        no = 1)
+                     YrQtr = .data$Year + (lubridate::quarter(.data$Date)-1)*0.25
                      ) %>%
               select(.data$Island,
                      .data$YrQtr,
