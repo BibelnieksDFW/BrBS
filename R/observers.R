@@ -90,7 +90,7 @@ plot_observers <- function(obs_dat, filter_obs = FALSE) {
       labs(y = "Observer",
                     shape = "Quarter") +
       theme(axis.title.x = element_blank(),
-                     legend.position = c(.1, .75),
+                     legend.position = c(.2, .75),
                      legend.box = "horizontal")
   }
 
