@@ -11,13 +11,19 @@ RoxygenNote: 7.1.2
 Imports: 
     dplyr,
     ggplot2,
+    graphics,
+    gt,
     lubridate,
     magrittr,
+    MASS,
     readxl,
     rlang,
+    sandwich,
     stats,
     stringr,
     suncalc,
-    tidyr
+    tictoc,
+    tidyr,
+    utils
 URL: https://github.com/BibelnieksDFW/BrBS
 BugReports: https://github.com/BibelnieksDFW/BrBS/issues
