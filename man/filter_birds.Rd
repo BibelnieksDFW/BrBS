@@ -2,7 +2,7 @@
 % Please edit documentation in R/species_counts.R
 \name{filter_birds}
 \alias{filter_birds}
-\title{Title Convenient wrapper for filtering bird species in BBS data.}
+\title{Convenient wrapper for filtering bird species in BBS data.}
 \usage{
 filter_birds(bbs_dat, active_birds)
 }
@@ -15,5 +15,5 @@ filter_birds(bbs_dat, active_birds)
 Dataframe filtered to only include active birds.
 }
 \description{
-Title Convenient wrapper for filtering bird species in BBS data.
+Convenient wrapper for filtering bird species in BBS data.
 }

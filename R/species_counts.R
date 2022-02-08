@@ -19,7 +19,7 @@ islandwide_counts <- function(bbs_dat) {
 
 #' Create plot for individual bird.
 #'
-#' @param bird String for Species_Code found in bdat.
+#' @param bird Character vector for Species_Code found in bdat.
 #' @param bbs_dat BBS dataframe with data for 'bird' Species_Code. May have more as well, intended to be passed through lapply in plot_counts.
 #'
 #' @return ggplot of counts over time for bird.
@@ -58,7 +58,7 @@ plot_bird_count <- function(bird, bbs_dat) {
 #' @return List of ggplots for each bird species in birds.
 #' @export
 #'
-plot_counts <- function(bbs_dat, birds = c()) {
+plot_species_counts <- function(bbs_dat, birds = c()) {
   # If bird unspecified, grab all of them
   if(length(birds) == 0) {
     birds = unique(bbs_dat$Species_Code)
@@ -80,7 +80,7 @@ filter_stations <- function(bbs_dat, active_stations) {
   bbs_dat %>% filter(.data$Station %in% active_stations)
 }
 
-#' Title Convenient wrapper for filtering bird species in BBS data.
+#' Convenient wrapper for filtering bird species in BBS data.
 #'
 #' @param bbs_dat Dataframe with BBS data.
 #' @param active_birds Character vector of species codes to retain.

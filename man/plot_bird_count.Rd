@@ -7,7 +7,7 @@
 plot_bird_count(bird, bbs_dat)
 }
 \arguments{
-\item{bird}{String for Species_Code found in bdat.}
+\item{bird}{Character vector for Species_Code found in bdat.}
 
 \item{bbs_dat}{BBS dataframe with data for 'bird' Species_Code. May have more as well, intended to be passed through lapply in plot_counts.}
 }
