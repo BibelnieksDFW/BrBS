@@ -12,6 +12,8 @@ Imports:
     dplyr,
     ggplot2,
     graphics,
+    grid,
+    gridExtra,
     gt,
     lubridate,
     magrittr,
