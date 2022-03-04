@@ -2,7 +2,7 @@
 % Please edit documentation in R/start_times.R
 \name{get_survey_start_times}
 \alias{get_survey_start_times}
-\title{Gather survey start times to use in relation to sunrise as a covariate}
+\title{Gather earliest survey start times in relation to sunrise.}
 \usage{
 get_survey_start_times(bbs_dat)
 }
@@ -10,8 +10,8 @@ get_survey_start_times(bbs_dat)
 \item{bbs_dat}{Dataframe with BBS data. Must have columns Year, Station, Date,}
 }
 \value{
-Dataframe with year-quarter, start time in minutes from sunrise, and bins for more/less than 30 minutes before/after sunrise
+Dataframe with YrQtr, start time in minutes from sunrise, and bins for more/less than 30 minutes before/after sunrise.
 }
 \description{
-Gather survey start times to use in relation to sunrise as a covariate
+Gather earliest survey start times in relation to sunrise.
 }
