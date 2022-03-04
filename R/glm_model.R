@@ -168,7 +168,7 @@ model_birds_glm <- function(dat,
                                  back_trans_plots = back_trans_plot_list,
                                  resid_plots = fit_resid_plot_list,
                                  unexp_plots = unexp_plot_list)
-
+  return(models_plots)
 }
 
 #' Fit a Poisson or Negative Binomial GLM to determine
@@ -197,7 +197,7 @@ fit_glm <- function(bdat, formulas, family) {
     bmod <- NULL
   }
 
-  bmod
+  return(bmod)
 }
 
 #' Build formula strings for passing to lm and glm type calls.
@@ -228,6 +228,8 @@ build_formulas <- function(resp, prmt, const, depends) {
                  lapply(combos, paste,
                         collapse = " + "),
                  sep = " ~ ")
+
+  return(forms)
 }
 
 #' Check dependencies when building formula strings.
@@ -244,7 +246,7 @@ dep_check <- function(combo, dep) {
       combo <- c(dep$on[i], combo)
     }
   }
-  combo
+  return(combo)
 }
 
 #' Extract formula character vector from glm object
@@ -257,7 +259,7 @@ dep_check <- function(combo, dep) {
 get_glm_formula <- function(mod) {
   pieces <- as.character(stats::formula(mod))
   whole <- sprintf("%s ~ %s", pieces[2], pieces[3])
-  whole
+  return(whole)
 }
 
 #' Goodness of fit test based on residual deviance.
@@ -272,7 +274,33 @@ gof_test <- function(glm) {
   df <- glm$df.residual
   p <- stats::pchisq(res_deviance, df, lower.tail = FALSE)
 
-  list(res_deviance = res_deviance,
-       df = df,
-       p = p)
+  ret <- list(res_deviance = res_deviance,
+               df = df,
+               p = p)
+  return(ret)
 }
+
+#' Prep BBS data for GLM modeling.
+#' Create dataframe with Count, Year, Year squared, Quarter, and N_Stations for passing to model_birds_glm.
+#'
+#' @param bbs_dat Dataframe with BBS data.
+#'
+#' @return Dataframe with columns suitable for BrBS' default glm modeling.
+#' @export
+#'
+prep_dat_glm <- function(bbs_dat) {
+  # Sum islandwide counts
+  spec_counts <- islandwide_counts(bbs_dat)
+  # Get N_Stations control variable
+  n_stats <- get_n_stats(bbs_dat)
+
+  # Create glm vars, join N_Stations
+  glm_dat <- spec_counts %>%
+    mutate(Year = floor(.data$YrQtr),
+           Year2 = .data$Year^2,
+           Qtr = as.factor((.data$YrQtr - .data$Year)*4+1)) %>%
+    left_join(n_stats, by = "YrQtr")
+
+  return(glm_dat)
+}
+
