@@ -7,13 +7,14 @@
 #'
 islandwide_counts <- function(bbs_dat) {
   island_wide <- bbs_dat %>%
-    filter(!is.na(.data$Count)) %>%
-    group_by(.data$YrQtr, .data$Station, .data$Species_Code) %>%
-    # For replicates, average across for counts (round to even)
-    summarize(Count = round(mean(.data$Count))) %>%
-    group_by(.data$YrQtr, .data$Species_Code) %>%
-    summarize(Count = sum(.data$Count)) %>%
-    ungroup()
+                  filter(!is.na(.data$Count)) %>%
+                  group_by(.data$YrQtr, .data$Station, .data$Species_Code) %>%
+                  # For replicates, average across for counts (round to even)
+                  summarize(Count = round(mean(.data$Count))) %>%
+                  group_by(.data$YrQtr, .data$Species_Code) %>%
+                  summarize(Count = sum(.data$Count)) %>%
+                  ungroup()
+  return(island_wide)
 }
 
 
@@ -47,7 +48,7 @@ plot_bird_count <- function(bird, bbs_dat) {
   }
 
 
-  plt
+  return(plt)
 }
 
 #' Create plots for multiple bird species. If no species specified, plot for all available.
@@ -65,7 +66,9 @@ plot_species_counts <- function(bbs_dat, birds = c()) {
   }
 
   # apply plot function across all species
-  lapply(birds, plot_bird_count, bbs_dat = bbs_dat)
+  plts <- lapply(birds, plot_bird_count, bbs_dat = bbs_dat)
+
+  return(plts)
 }
 
 #' Convenient wrapper for filtering stations in BBS data.
@@ -92,3 +95,43 @@ filter_birds <- function(bbs_dat, active_birds) {
   bbs_dat %>% filter(.data$Species_Code %in% active_birds)
 }
 
+#' Create a summary table for count data availability.
+#'
+#' @param counts Count dataframe from islandwide_counts.
+#' @param order_col Character vector for column to sort table by. One of Species_Code, firstYr, lastYr, propSurveys, lastCount.
+#' @param descending Logical to sort in descending order. Default is ascending.
+#'
+#' @return gt table with data availability info.
+#' @export
+#'
+species_counts_summary <- function(counts, order_col = "firstYr", descending = FALSE) {
+  # Total number of surveys recorded
+  n_surveys <- length(unique(counts$YrQtr))
+  # Create summary for each species
+  gt_dat <- counts %>%
+            group_by(.data$Species_Code) %>%
+            summarise(firstYr = floor(min(.data$YrQtr)),
+                      lastYr = floor(max(.data$YrQtr)),
+                      propSurveys = n() / n_surveys,
+                      lastCount = .data$Count[which(.data$YrQtr == max(.data$YrQtr))])
+  # Order by column, ascending is default
+  if(descending) {
+    gt_dat <- arrange(gt_dat, desc(gt_dat[[order_col]]))
+  } else {
+    gt_dat <- arrange(gt_dat, gt_dat[[order_col]])
+  }
+
+  # Build table
+  sum_gt <- gt_dat %>%
+            gt::gt(rowname_col = "Species_Code") %>%
+            gt::fmt_percent(columns = "propSurveys",
+                            decimals = 0) %>%
+            gt::cols_label(Species_Code = "Species Code",
+                           firstYr = "First Detected",
+                           lastYr = "Last Detected",
+                           propSurveys = "% of Surveys Detected In",
+                           lastCount = "Most Recent Count") %>%
+            gt::tab_header("Summary of Counts by Species")
+
+  return(sum_gt)
+}
