@@ -18,6 +18,7 @@ Imports:
     lubridate,
     magrittr,
     MASS,
+    randomForest,
     readxl,
     rlang,
     sandwich,
