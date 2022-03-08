@@ -1,5 +1,8 @@
 ###### Forecasting - Fit Random Forest on Lags against GLM Benchmark ######
 
+# Make R check happy about non-standard evaluation with '.'
+utils::globalVariables(".")
+
 #' Build a forecasting model for counts using random forest, benchmarked against our standard GLM approach.
 #' Forecasting for random forest is performed recursively so that we can compare models over the training data.
 #'
