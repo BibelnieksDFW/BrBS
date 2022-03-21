@@ -83,9 +83,17 @@ glm_exec_summary_row <- function(bmod) {
 
   }
 
-  # Check that N_Stations is positively correlated
+  # Check that N_Stations is positively correlated, or at least not significantly negatively correlated.
   nstats <- case_when(bmod$coefficients["N_Stations"] >=0 ~ "+",
                       TRUE ~ "-")
+  nstats_pval <- bmod %>%
+                  summary() %>%
+                  stats::coef() %>%
+                  .[which(rownames(.)=="N_Stations"),4]
+  if(nstats_pval < 0.05) {
+    nstats <- paste0(nstats, "*")
+  }
+
 
   # Identify model family
   fam <- ifelse(stats::family(bmod)[1] == "poisson",
