@@ -10,7 +10,7 @@ plot_cpts_path(cpts_path)
 \item{cpts_path}{Path list from model_cpts or model_birds_cpts.}
 }
 \value{
-path_plt Graphical object representing plot
+Graphical object representing changepoint path.
 }
 \description{
 Plot binary segmentation path for changepoint model.

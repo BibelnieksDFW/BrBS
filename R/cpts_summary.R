@@ -18,7 +18,7 @@ get_modeled_cpts <- function(modlist) {
 #' @param robust_se Flag for including HAC robust standard errors from package 'sandwich' in plots.
 #' @param species Species code for species being modeled. Used in title of plot.
 #'
-#' @return ggplot of model
+#' @return ggplot of fitted model.
 #' @export
 #'
 plot_cpts_model <- function(modlist, robust_se = FALSE, species = "") {
@@ -102,11 +102,54 @@ plot_cpts_model <- function(modlist, robust_se = FALSE, species = "") {
        resid_time = resid_time_plt)
 }
 
+#' Plot changepoint distribution over multiple species.
+#'
+#' @param cpts_fits Fitted models from model_birds_cpts.
+#'
+#' @return ggplot of stacked bar chart displaying the distribbution of changepoints.
+#' @export
+#'
+plot_cpts_dist <- function(cpts_fits) {
+  # Grab changepoints from fits
+  cpt_list <- list()
+  for(b in seq_along(unique(cpts_fits$species_code))) {
+    cpts <- get_modeled_cpts(cpts_fits$models[[b]])
+    cpt_list[[b]] <- data.frame(Species_Code = rep(cpts_fits$species_code[b], length(cpts)), Cpts = cpts)
+  }
+  cpts_all <- bind_rows(cpt_list) %>%
+    mutate(n = 1, Cpts_Yr = floor(.data$Cpts))
+
+  # Get time range
+  time_range <- unlist(lapply(cpts_fits$models,
+                              function(x) lapply(x,
+                                                 function(y) y$model$time
+                                                )
+                              )
+                      )
+  # Build stacked bar chart
+  min_yr <- floor(min(time_range))
+  max_yr  <- floor(max(time_range))
+  cpts_plt <- cpts_all %>%
+    ggplot(aes(x = .data$Cpts_Yr,
+               y = .data$n,
+               fill = .data$Species_Code,
+               label = .data$Species_Code)) +
+    geom_bar(position = "stack", stat = "identity") +
+    geom_text(size = 3, position = position_stack(vjust = 0.5), angle = 90) +
+    scale_x_continuous(limits = c(min_yr, max_yr),
+                       breaks = seq(min_yr, max_yr, 3),
+                       minor_breaks = seq(min_yr,max_yr,1)) +
+    labs(title = "Modeled Changepoints", x = "Year", y = element_blank())
+
+  return(cpts_plt)
+}
+
+
 #' Plot binary segmentation path for changepoint model.
 #'
 #' @param cpts_path Path list from model_cpts or model_birds_cpts.
 #'
-#' @return path_plt Graphical object representing plot
+#' @return Graphical object representing changepoint path.
 #' @export
 #'
 plot_cpts_path <- function(cpts_path) {

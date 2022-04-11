@@ -14,7 +14,7 @@ plot_cpts_model(modlist, robust_se = FALSE, species = "")
 \item{species}{Species code for species being modeled. Used in title of plot.}
 }
 \value{
-ggplot of model
+ggplot of fitted model.
 }
 \description{
 Plot changepoint models.
